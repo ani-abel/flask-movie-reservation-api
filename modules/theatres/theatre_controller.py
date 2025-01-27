@@ -25,9 +25,9 @@ def controller_find_theatre_by_id(current_user, theatre_id: str):
 
 @theatre_blueprint_api.route("/<string:theatre_id>", methods=["DELETE"])
 @token_required
-def controller_delete_theatre(current_user, movie_id: str):
+def controller_delete_theatre(current_user, theatre_id: str):
     print(f"current_user => {current_user}")
-    return delete_theatre(movie_id)
+    return delete_theatre(theatre_id)
 
 @theatre_blueprint_api.route("/", methods=["DELETE"])
 @token_required
@@ -38,6 +38,6 @@ def controller_delete_theatres(current_user):
 
 @theatre_blueprint_api.route("/<string:theatre_id>", methods=["PATCH", "PUT"])
 @token_required
-def controller_update_theatre(current_user, movie_id: str):
+def controller_update_theatre(current_user, theatre_id: str):
     print(f"current_user => {current_user}")
-    return update_theatre(current_user, movie_id)
+    return update_theatre(current_user, theatre_id)

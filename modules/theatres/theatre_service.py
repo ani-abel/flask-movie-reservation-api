@@ -84,7 +84,7 @@ def update_theatre(current_user, theatre_id: str):
 
     if request_form["seat_count"] is not None and theatre_record["seat_count"] != request_form["seat_count"]:
         if int(request_form["seat_count"]) <= 0:
-            abort(400, "Seat count for a theatre must be > 0")
+            abort(400, "Seat_count for a theatre must be > 0")
         theatre_record["seat_count"] = int(request_form["seat_count"])
 
     if request_form["name"] is not None and theatre_record["name"] != request_form["name"]:
