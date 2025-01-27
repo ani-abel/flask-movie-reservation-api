@@ -16,9 +16,11 @@ class TicketPrice(db.Model):
 
     # Relations
     # ==> Admin who added this theatre_price to db
+    # Many-to-one
     user_id = db.Column(db.String(100), db.ForeignKey("user.id"))
-    user = db.relationship("User", back_populates="ticketPrices")
+    user = db.relationship("User", back_populates="ticket_prices")
 
+    # One-to-many
     tickets = db.relationship("Ticket", back_populates="ticket_price")
 
     # How to serialize SqlAlchemy PostgreSQL Query to JSON => https://stackoverflow.com/a/46180522

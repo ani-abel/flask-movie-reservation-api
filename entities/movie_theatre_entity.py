@@ -13,7 +13,7 @@ class MovieTheatre(db.Model):
 
     # Relations
     movie_id = db.Column(db.String(100), db.ForeignKey("movie.id"))
-    movie = db.relationship("Movie", back_populates="movieTheatres")
+    movie = db.relationship("Movie", back_populates="movie_theatres")
 
     theatre_id = db.Column(db.String(100), db.ForeignKey("theatre.id"))
     theatre = db.relationship("Theatre", back_populates="movieTheatres")
@@ -23,6 +23,9 @@ class MovieTheatre(db.Model):
     end_time = db.Column(db.String(20), nullable=False)
 
     movie_theatres = db.relationship("Ticket", back_populates="movie_theatre")
+    # tickets = db.relationship("Ticket", back_populates="movie_theatre")
+    # movies = db.relationship("Movie", back_populates="user")
+
 
     # How to serialize SqlAlchemy PostgreSQL Query to JSON => https://stackoverflow.com/a/46180522
     def toDict(self):

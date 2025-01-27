@@ -12,6 +12,8 @@ class Theatre(db.Model):
     date_updated = db.Column(db.DateTime(timezone=True), default=datetime.now,
                              onupdate=datetime.now)  # The Date of the Instance Update => Changed with Every Update
 
+    status = db.Column(db.Boolean, nullable=False, default=True)
+
     name = db.Column(db.String(255), nullable=False)
 
     location = db.Column(db.String(500), nullable=False)
@@ -45,6 +47,8 @@ def before_insert_listener(mapper, connection, target):
     """
        This event listener generates a UUID before a new row is inserted.
        """
+    target.name = str(target.name).lower()
+    target.location = str(target.location).lower()
     if not target.id:  # Only generate UUID if not already set
         target.id = str(uuid4())
 

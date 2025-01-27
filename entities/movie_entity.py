@@ -20,7 +20,11 @@ class Movie(db.Model):
     promotional_image = db.Column(db.String(500), nullable=False)
 
     # Relations
-    movieTheatres = db.relationship("MovieTheatre", back_populates="movie")
+    user_id = db.Column(db.String(100), db.ForeignKey("user.id"))
+    user = db.relationship("User", back_populates="movies")
+
+    # Relations
+    movie_theatres = db.relationship("MovieTheatre", back_populates="movie")
 
     # Set an empty string to null for title field => https://stackoverflow.com/a/57294872
     @validates('title')
@@ -43,5 +47,8 @@ def before_insert_listener(mapper, connection, target):
     """
        This event listener generates a UUID before a new row is inserted.
        """
+    # turn values to lowercase
+    target.title = str(target.title).lower()
+    target.synopsis = str(target.synopsis).lower()
     if not target.id:  # Only generate UUID if not already set
         target.id = str(uuid4())

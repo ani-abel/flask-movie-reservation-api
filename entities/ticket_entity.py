@@ -21,8 +21,9 @@ class Ticket(db.Model):
     movie_theatre = db.relationship("MovieTheatre", back_populates="movie_theatres")
 
     ticket_price_id = db.Column(db.String(100), db.ForeignKey("ticket_price.id"))
-    ticket_price = db.relationship("TicketPrice", back_populates="ticket_prices")
+    ticket_price = db.relationship("TicketPrice", back_populates="tickets")
 
+    # One-to-many
     payments = db.relationship("Payment", back_populates="ticket")
 
     # How to serialize SqlAlchemy PostgreSQL Query to JSON => https://stackoverflow.com/a/46180522

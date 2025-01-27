@@ -2,7 +2,7 @@ from os import getenv
 from flask import jsonify
 from dotenv import load_dotenv
 from init_app import create_app
-# from routes import register_blueprints
+from routes import register_blueprints
 from werkzeug.exceptions import  HTTPException
 
 load_dotenv("./.env")
@@ -32,10 +32,10 @@ def hello_world():
     })
 
 # Register all blueprints
-# register_blueprints(app)
+register_blueprints(app)
 
 # ----------------------------------------------- #
 if __name__ == '__main__':
     # To Run the Server in Terminal => flask run -h localhost -p 5000
     # To Run the Server with Automatic Restart When Changes Occurred => FLASK_DEBUG=1 flask run -h localhost -p 4004
-    app.run(debug=True, port=4004, host="localhost", load_dotenv=True, )
+    app.run(debug=True, port=4004, host="localhost", load_dotenv=True)
