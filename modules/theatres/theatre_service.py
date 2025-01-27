@@ -43,8 +43,8 @@ def delete_theatres():
 
     # Fetch the records to ensure they exist
     theatre_records = Theatre.query.filter(Theatre.id.in_(theatre_ids)).all()
-    if not theatre_records:
-        abort(404, "No matching theatres found")
+    if not theatre_records or len(theatre_records) != len(theatre_ids):
+        abort(404, "Not all theatres could be matched")
 
     # Delete the records
     Theatre.query.filter(Theatre.id.in_(theatre_ids)).delete(synchronize_session=False)
@@ -53,7 +53,7 @@ def delete_theatres():
     return jsonify({
         "success": True,
         "code": 200,
-        "message": f"Theatres with IDs {theatre_ids} deleted successfully"
+        "message": f"Theatres with IDs {", ".join(map(str, theatre_ids))} deleted successfully"
     })
 
 def delete_theatre(theatre_id: str):

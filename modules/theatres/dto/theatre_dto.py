@@ -3,8 +3,8 @@ from typing import Optional, Required
 
 class FilterTheatreDTO(BaseModel):
     # name: Required[str] = None
-    searchTerm: Optional[str] = None
-    seat_count: Optional[int] = None
+    searchTerm: Optional[constr(to_lower=True)] = None
+    seat_count: Optional[conint(gt=0)] = None
     page_number: Optional[conint(ge=1)] = Field(1, description="page_number, must be >= 1")
     page_size: Optional[conint(gt=0)] = Field(10, description="page_size, must be > 0")
 

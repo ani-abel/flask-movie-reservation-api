@@ -11,6 +11,7 @@ class Movie(db.Model):
                              default=datetime.now)  # The Date of the Instance Creation => Created one Time when Instantiation
     date_updated = db.Column(db.DateTime(timezone=True), default=datetime.now,
                              onupdate=datetime.now)  # The Date of the Instance Update => Changed with Every Update
+    status = db.Column(db.Boolean, nullable=False, default=True)
 
     title = db.Column(db.String(255), nullable=False, unique=True)
     synopsis = db.Column(db.String(255), nullable=False)
