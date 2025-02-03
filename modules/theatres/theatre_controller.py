@@ -35,7 +35,6 @@ def controller_delete_theatres(current_user):
     print(f"current_user => {current_user}")
     return delete_theatres()
 
-
 @theatre_blueprint_api.route("/<string:theatre_id>", methods=["PATCH", "PUT"])
 @token_required
 def controller_update_theatre(current_user, theatre_id: str):

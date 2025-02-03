@@ -1,6 +1,6 @@
 from init_app import db
-from flask import request, jsonify, abort
 from entities.movie_entity import Movie
+from flask import request, jsonify, abort
 from util_functions import extract_request_body, validate_uuid_field, validate_runtime_string, validate_url_field, check_for_required_fields
 
 # Add pagination
@@ -16,6 +16,7 @@ def find_movies():
     })
 
 def find_movie_by_id(movie_id: str):
+    print(f"Movie_id => {movie_id}")
     validate_uuid_field(movie_id, "movie_id")
     record = Movie.query.filter(Movie.id == movie_id).first()
     if not record:
@@ -24,33 +25,38 @@ def find_movie_by_id(movie_id: str):
         "success": True,
         "code": 200,
         "message": "Record found",
-        "data": record
+        "data": record.toDict()
     })
 
 def update_movie(current_user, movie_id: str):
     request_form = extract_request_body(request)
     movie_record = Movie.query.get(movie_id)
+    synopsis = request_form.get("synopsis", None)
+    title = request_form.get("title", None)
+    promotional_image = request_form.get("promotional_image", None)
+    runtime = request_form.get("runtime", None)
+
     if not movie_record or movie_record is None:
         abort(404, "Movie was not found")
 
-    if current_user["user_id"] != movie_record["userId"]:
+    if current_user["id"] != movie_record.user_id:
         abort(409, "You cannot update a movie you never added")
 
     # note_group_id = request_form["note_group_id"] if request_form["note_group_id"] else None
 
-    if request_form["title"] is not None and movie_record["title"] != request_form["title"]:
-        movie_record["title"] = request_form["title"]
+    if title is not None and movie_record.title != request_form["title"]:
+        movie_record.title = title
 
-    if request_form["synopsis"] is not None and movie_record["synopsis"] != request_form["synopsis"]:
-        movie_record["synopsis"] = request_form["synopsis"]
+    if synopsis is not None and movie_record.synopsis != synopsis:
+        movie_record.synopsis = synopsis
 
-    if request_form["promotional_image"] is not None and movie_record["promotional_image"] != request_form["promotional_image"]:
+    if promotional_image is not None and movie_record.promotional_image != promotional_image:
         validate_url_field(request_form["promotional_image"], 'promotional_image')
-        movie_record["promotional_image"] = request_form["promotional_image"]
+        movie_record.promotional_image = promotional_image
 
-    if request_form["runtime"] is not None and movie_record["runtime"] != request_form["runtime"]:
+    if runtime is not None and movie_record.runtime != runtime:
         validate_runtime_string(request_form["runtime"], 'runtime')
-        movie_record["runtime"] = request_form["runtime"]
+        movie_record.runtime = runtime
 
     db.session.commit()
     result = Movie.query.get(movie_id).toDict()
@@ -64,10 +70,12 @@ def update_movie(current_user, movie_id: str):
 def delete_movie(movie_id: str):
     validate_uuid_field(movie_id, "movie_id")
     movie_record = Movie.query.get(movie_id)
-    if not movie_record:
+    print(f"MOVIE_RECORD => {movie_record}")
+    if not movie_record or movie_record is None:
         abort(404, "Movie not found")
 
-    Movie.query.delete(id=movie_id).delete()
+    Movie.query.filter_by(id=movie_id).delete()
+    # db.session.delete(movie_record) # Second style of deleting data
     db.session.commit()
 
     return jsonify({
@@ -78,8 +86,8 @@ def delete_movie(movie_id: str):
 
 def create_movie(current_user):
     request_form = extract_request_body(request)
-    check_for_required_fields(["title", "synopsis", "promotional_image"], request_form)
-    admin_user_id = current_user["user_id"]
+    check_for_required_fields(["title", "runtime", "synopsis", "promotional_image"], request_form)
+    admin_user_id = current_user["id"]
     title = str(request_form["title"]).lower()
     synopsis = request_form["synopsis"]
     promotional_image = request_form["promotional_image"]

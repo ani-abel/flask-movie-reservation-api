@@ -1,9 +1,9 @@
 import re
 import jwt
-from os import getenv, remove
-from flask import abort
 from uuid import uuid4
+from flask import abort
 from typing import List, Dict
+from os import getenv, remove
 from dotenv import load_dotenv
 from imagekitio import ImageKit
 from datetime import datetime, timedelta
@@ -71,8 +71,6 @@ def upload_file_to_imagekit(
     return upload_result.url
 
 
-
-
 def extract_request_body(request) -> dict:
     request_form: dict = {}
     if request.content_type.startswith('multipart/form-data'):
@@ -81,6 +79,9 @@ def extract_request_body(request) -> dict:
         request_form = request.get_json()
 
     return request_form
+
+def extract_request_query_params(request) -> dict:
+    return request.args.to_dict()
 
 def validate_uuid(uuid_string: str) -> bool:
     # /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -92,8 +93,7 @@ def validate_uuid_field(uuid_string: str, field_name="uuid") -> None:
         abort(400, f"Field {field_name} has invalid uuid format")
 
 def validate_url(uuid_string: str) -> bool:
-    # /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
-    reg_exp = r'^/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$'
+    reg_exp = r'^\bhttps?:\/\/[^\s\/$.?#].[^\s]*\b$'
     return bool(re.match(reg_exp, uuid_string))
 
 def validate_url_field(url_string: str, field_name="url") -> None:
@@ -151,3 +151,75 @@ def check_for_required_fields(required_fields: List[str], request_payload: Dict)
     ]
     if missing_fields:
         abort(400, f"Missing required field(s): '{', '.join(missing_fields)}'")
+
+def check_movie_duration(start_time: str, end_time: str, movie_duration: str) -> tuple:
+    # Convert start_time and end_time to datetime objects
+    start = datetime.strptime(start_time, "%I:%M%p")
+    end = datetime.strptime(end_time, "%I:%M%p")
+
+    # Handle cases where end_time is on the next day
+    if end <= start:
+        end += timedelta(days=1)
+
+    # Calculate the duration between start_time and end_time
+    time_difference = end - start
+    hours, remainder = divmod(time_difference.seconds, 3600)
+    minutes = remainder // 60
+
+    # Parse movie_duration into hours and minutes
+    movie_duration_parts = movie_duration.split("h")
+    movie_hours = int(movie_duration_parts[0].strip())
+    movie_minutes = int(movie_duration_parts[1].replace("m", "").strip())
+    movie_duration_timedelta = timedelta(hours=movie_hours, minutes=movie_minutes)
+
+    # Check if the movie fits in the available time
+    fits = movie_duration_timedelta <= time_difference
+
+    # Return the duration and the check result
+    return f"{hours}h {minutes}m", fits
+
+def is_past_date(date_str: str) -> bool:
+    """Check if the given date is in the past."""
+    date_input = datetime.strptime(date_str, "%m/%d/%Y").date()  # Convert string to date
+    today = datetime.today().date()  # Get today's date
+    return date_input < today  # True if it's in the past, False otherwise
+
+def validate_past_date(date_str: str, field_name: str) -> None:
+    is_date_past = is_past_date(date_str)
+    if is_date_past:
+        abort(400, f"Field {field_name} has date in the past")
+
+def parse_time(time_str):
+    """Convert 12-hour time format (e.g., '1:00pm') to a datetime object."""
+    return datetime.strptime(time_str, "%I:%M%p")
+
+
+def time_frame_check(time_intervals: list[dict], current_time_frame: dict) -> dict:
+    """Check for overlap and return the overlap duration in minutes."""
+    current_start = parse_time(current_time_frame["start_time"])
+    current_end = parse_time(current_time_frame["end_time"])
+
+    total_overlap = 0  # Track total overlap in minutes
+    overlaps = []  # Store overlapping time frames
+
+    for interval in time_intervals:
+        interval_start = parse_time(interval["start_time"])
+        interval_end = parse_time(interval["end_time"])
+
+        # Check for overlap
+        if not (current_end <= interval_start or current_start >= interval_end):
+            overlap_start = max(current_start, interval_start)
+            overlap_end = min(current_end, interval_end)
+            overlap_minutes = int((overlap_end - overlap_start).total_seconds() / 60)
+            overlaps.append({
+                "overlap_start": overlap_start.strftime("%I:%M%p"),
+                "overlap_end": overlap_end.strftime("%I:%M%p"),
+                "overlap_minutes": overlap_minutes
+            })
+            total_overlap += overlap_minutes
+
+    return {
+        "has_overlap": bool(overlaps),
+        "total_overlap_minutes": total_overlap,
+        "overlapping_intervals": overlaps
+    }

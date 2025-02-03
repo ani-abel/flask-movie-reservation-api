@@ -12,7 +12,7 @@ def find_theatre_by_id(theatre_id: str):
         "success": True,
         "code": 200,
         "message": "Record found",
-        "data": record,
+        "data": record.toDict(),
     })
 
 # (=> Add pagination)
@@ -26,7 +26,6 @@ def find_theatres():
         "message": "Records found",
         "data": result
     })
-
 
 # def delete_theatres(theatre_ids: list[str]):
 def delete_theatres():
@@ -53,7 +52,7 @@ def delete_theatres():
     return jsonify({
         "success": True,
         "code": 200,
-        "message": f"Theatres with IDs {", ".join(map(str, theatre_ids))} deleted successfully"
+        "message": f"Theatres with IDs [{", ".join(map(str, theatre_ids))}] deleted successfully"
     })
 
 def delete_theatre(theatre_id: str):
@@ -61,7 +60,7 @@ def delete_theatre(theatre_id: str):
     theatre_record = Theatre.query.get(theatre_id)
     if not theatre_record:
         abort(404, "Theatre not found")
-    Theatre.query.delete(id=theatre_id).delete()
+    Theatre.query.filter_by(id=theatre_id).delete()
     db.session.commit()
 
     return jsonify({
@@ -76,25 +75,29 @@ def update_theatre(current_user, theatre_id: str):
     if not theatre_record or theatre_record is None:
         abort(404, "Movie was not found")
 
-    if current_user["user_id"] != theatre_record["userId"]:
+    location = request_form.get("location", None)
+    seat_count = request_form.get("seat_count", None)
+    name = request_form.get("name", None)
+    status = request_form.get("status", None)
+    if current_user["id"] != theatre_record.user_id:
         abort(409, "You cannot update a theatre you never added")
 
-    if request_form["location"] is not None and theatre_record["location"] != request_form["location"]:
-        theatre_record["location"] = str(request_form["location"]).lower()
+    if location is not None and theatre_record.location != location:
+        theatre_record.location = str(location).lower()
 
-    if request_form["seat_count"] is not None and theatre_record["seat_count"] != request_form["seat_count"]:
+    if seat_count is not None and theatre_record.seat_count != seat_count:
         if int(request_form["seat_count"]) <= 0:
             abort(400, "Seat_count for a theatre must be > 0")
-        theatre_record["seat_count"] = int(request_form["seat_count"])
+        theatre_record.seat_count = int(request_form["seat_count"])
 
-    if request_form["name"] is not None and theatre_record["name"] != request_form["name"]:
-        theatre_record["name"] = str(request_form["name"]).lower()
+    if name is not None and theatre_record.name != name:
+        theatre_record.name = str(request_form["name"]).lower()
 
-    if request_form["status"]:
-        theatre_record["status"] = request_form["status"]
+    if status is not None:
+        theatre_record.status = status
 
     db.session.commit()
-    result = Theatre.query(theatre_id).toDict()
+    result = Theatre.query.get(theatre_id).toDict()
     return jsonify({
         "success": True,
         "code": 200,
@@ -105,7 +108,7 @@ def update_theatre(current_user, theatre_id: str):
 def create_theatre(current_user):
     request_form = extract_request_body(request)
     check_for_required_fields(["name", "location", "seat_count"], request_form)
-    admin_user_id = current_user["user_id"]
+    admin_user_id = current_user["id"]
     name = str(request_form["name"]).lower()
     location = str(request_form["location"]).lower()
     seat_count = int(request_form["seat_count"])
@@ -128,5 +131,3 @@ def create_theatre(current_user):
         "message": "Created",
         "data": new_theatre_record
     })
-
-

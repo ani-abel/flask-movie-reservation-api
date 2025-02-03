@@ -1,8 +1,9 @@
-from sqlalchemy import inspect
-from datetime import datetime
-from sqlalchemy import event
-from init_app import db
+from time import timezone
 from uuid import uuid4
+from init_app import db
+from sqlalchemy import event
+from datetime import datetime
+from sqlalchemy import inspect
 
 class MovieTheatre(db.Model):
     id = db.Column(db.String(50), primary_key=True, nullable=False, unique=True)
@@ -21,15 +22,31 @@ class MovieTheatre(db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     start_time = db.Column(db.String(20), nullable=False)
     end_time = db.Column(db.String(20), nullable=False)
+    viewing_date = db.Column(db.DateTime(timezone=True), nullable=False)
 
     movie_theatres = db.relationship("Ticket", back_populates="movie_theatre")
-    # tickets = db.relationship("Ticket", back_populates="movie_theatre")
-    # movies = db.relationship("Movie", back_populates="user")
 
 
     # How to serialize SqlAlchemy PostgreSQL Query to JSON => https://stackoverflow.com/a/46180522
-    def toDict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+    # def toDict(self):
+    #     return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+
+    def toDict(self, include_nested_fields=None):
+        # Convert basic columns to dictionary
+        result = {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+
+        # If no nested fields are specified, just return the result
+        if not include_nested_fields:
+            return result
+
+        # Dynamically include nested fields
+        for field in include_nested_fields:
+            related_obj = getattr(self, field, None)
+            if related_obj:
+                # Call the `toDict` method of the related object, if it exists
+                result[field] = related_obj.toDict() if hasattr(related_obj, 'toDict') else str(related_obj)
+
+        return result
 
     def __repr__(self):
         return "<%r>" % self.id

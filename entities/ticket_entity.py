@@ -27,8 +27,22 @@ class Ticket(db.Model):
     payments = db.relationship("Payment", back_populates="ticket")
 
     # How to serialize SqlAlchemy PostgreSQL Query to JSON => https://stackoverflow.com/a/46180522
-    def toDict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+    def toDict(self, include_nested_fields=None):
+        # Convert basic columns to dictionary
+        result = {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+
+        # If no nested fields are specified, just return the result
+        if not include_nested_fields:
+            return result
+
+        # Dynamically include nested fields
+        for field in include_nested_fields:
+            related_obj = getattr(self, field, None)
+            if related_obj:
+                # Call the `toDict` method of the related object, if it exists
+                result[field] = related_obj.toDict() if hasattr(related_obj, 'toDict') else str(related_obj)
+
+        return result
 
     def __repr__(self):
         return "<%r>" % self.id
