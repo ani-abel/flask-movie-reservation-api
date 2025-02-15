@@ -35,7 +35,7 @@ def verify_paystack_payment(current_user):
         return jsonify({
             "success": True,
             "code": 200,
-            "message": "FFF-Payment verified",
+            "message": "Payment already verified",
             "data": remove_sensitive_fields(existing_payment.toDict())
         })
 
