@@ -1,0 +1,22 @@
+# Configuration Mode => development, testing, staging, or production
+CONFIG_MODE=development
+
+# POSTGRESQL_DATABASE_URI => 'postgresql+psycopg2://user:password@host:port/database'
+DEVELOPMENT_DATABASE_URL = 'postgresql+psycopg2://postgres:12345@localhost:5432/py_movie_db'
+TEST_DATABASE_URL        = 'postgresql+psycopg2://postgres:12345@localhost:5432/py_movie_db'
+STAGING_DATABASE_URL     = 'postgresql+psycopg2://postgres:12345@localhost:5432/py_movie_db'
+PRODUCTION_DATABASE_URL  = 'postgresql+psycopg2://postgres:12345@localhost:5432/py_movie_db'
+
+JWT_SECRET_KEY='SECRET'
+
+IMAGE_KIT_PUBLIC_KEY=
+IMAGE_KIT_PRIVATE_KEY=
+IMAGE_KIT_ENDPOINT=
+
+# PAYSTACK CONFIG
+PAYSTACK_SECRET_KEY=
+
+# FLUTTERWAVE CONFIG
+FLUTTERWAVE_SECRET_KEY=
+FLUTTERWAVE_ENCRYPTION_KEY=
+FLUTTERWAVE_SECRET_HASH=
