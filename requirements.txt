@@ -8,3 +8,4 @@ bcrypt==4.2.1
 PyJWT==2.10.1
 imagekitio==4.1.0
 pydantic==2.10.6
+requests==2.32.3

@@ -8,10 +8,33 @@ from dotenv import load_dotenv
 from imagekitio import ImageKit
 from datetime import datetime, timedelta
 from bcrypt import gensalt, hashpw, checkpw
+from requests import delete, patch, post, get
 from imagekitio.models.results.UploadFileResult import UploadFileResult
 from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
 
 load_dotenv("./.env")
+
+def convert_price_to_kobo(price: float) -> float:
+    return price * 100
+
+def convert_price_to_naira(price: float) -> float:
+    return price / 100
+
+def delete_api_request(url, headers = {}):
+    api_response = delete(url, headers = headers)
+    return api_response.json()
+
+def patch_api_request(url, body, headers = {}):
+    api_response = patch(url, headers = headers, json = body)
+    return api_response.json()
+
+def post_api_request(url, body, headers = {}):
+    api_response = post(url, headers=headers, json=body)
+    return api_response.json()
+
+def get_api_request(url, headers = {}):
+    api_response = get(url, headers = headers)
+    return api_response.json()
 
 def upload_file_to_imagekit(
         file_path: str,

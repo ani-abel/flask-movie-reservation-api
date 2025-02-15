@@ -25,6 +25,7 @@ class User(db.Model):
     tickets = db.relationship("Ticket", back_populates="user", cascade="all, delete-orphan")
     movies = db.relationship("Movie", back_populates="user", cascade="all, delete-orphan")
     ticket_prices = db.relationship("TicketPrice", back_populates="user", cascade="all, delete-orphan")
+    payments = db.relationship("Payment", back_populates="user", cascade="all, delete-orphan")
 
     # Set an empty string to null for username field => https://stackoverflow.com/a/57294872
     @validates('email')

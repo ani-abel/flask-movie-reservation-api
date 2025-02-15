@@ -26,7 +26,7 @@ def token_required(f):
             if token_expiry_time < current_timestamp:
                 abort(401, "Authentication token has expired!")
 
-            current_user= User.query.get(profile["user_id"]).toDict()
+            current_user = User.query.get(profile["user_id"]).toDict()
             if current_user is None:
                 abort(401, "Invalid Authentication token!")
         except Exception as ex:

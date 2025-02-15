@@ -26,8 +26,7 @@ def assign_movie_to_theatre(current_user):
     movie_id = request_form["movie_id"]
     theatre_id = request_form["theatre_id"]
     is_active = request_form["is_active"]
-    viewing_date = request_form["viewing_date"]
-    viewing_date_input = datetime.strptime(viewing_date, "%m/%d/%Y").date()
+    viewing_date_input = datetime.strptime(request_form["viewing_date"], "%m/%d/%Y").date()
 
     movie_record = Movie.query.filter(Movie.id == movie_id).first()
     if not movie_record:
@@ -39,8 +38,10 @@ def assign_movie_to_theatre(current_user):
 
     movie_check_details = check_movie_duration(start_time, end_time, movie_record.runtime)
     if not movie_check_details[1]:
-        abort(400, f"Timeframe is only: [{movie_check_details[0]}] Movie runtime exceeds the time window set for viewing")
+        error_message = f"Timeframe is only: [{movie_check_details[0]}] Movie runtime exceeds the time window set for viewing"
+        abort(400, error_message)
 
+    # Limit theatre schedules to just those from the same day
     theatre_times = MovieTheatre.query.filter(
         cast(MovieTheatre.viewing_date, Date) == viewing_date_input,
         MovieTheatre.theatre_id == theatre_id,

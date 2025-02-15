@@ -13,38 +13,38 @@ def login():
     username = request_form["email"]
     password = request_form['password']
     validate_email_field(username, 'email')
-    try:
-        default_error_message = "Incorrect login details"
+    # try:
+    default_error_message = "Incorrect login details"
 
-        validate_email_field(username, 'email')
-        user_record = User.query.filter_by(email=username).first()
+    validate_email_field(username, 'email')
+    user_record = User.query.filter_by(email = username).first()
 
-        if not user_record:
-            abort(404, default_error_message)
+    if not user_record:
+        abort(404, default_error_message)
 
-        user_record = user_record.toDict()
-        password_compared = check_password(password, user_record["password"])
-        if not password_compared:
-            abort(401, default_error_message)
+    user_record = user_record.toDict()
+    password_compared = check_password(password, user_record["password"])
+    if not password_compared:
+        abort(401, default_error_message)
 
-        # convert json to jwt
-        jwt_token_data = {
-            "user_id": user_record["id"],
-            "email": user_record["email"],
-            "phone_number": user_record["phone_number"]
-        }
-        jwt_token = generate_jwt_token(jwt_token_data, secret_key=getenv('JWT_SECRET_KEY'))
-        return jsonify({
-            "success": True,
-            "code": 200,
-            "data": jwt_token_data,
-            "token": jwt_token
-        })
-    except Exception as ex:
-        # Extract and print the error message
-        message = f"An error occurred: {str(ex)}"
-        print(message)
-        abort(500, ex)
+    # convert json to jwt
+    jwt_token_data = {
+        "user_id": user_record["id"],
+        "email": user_record["email"],
+        "phone_number": user_record["phone_number"]
+    }
+    jwt_token = generate_jwt_token(jwt_token_data, secret_key=getenv('JWT_SECRET_KEY'))
+    return jsonify({
+        "success": True,
+        "code": 200,
+        "data": jwt_token_data,
+        "token": jwt_token
+    })
+    # except Exception as ex:
+    #     # Extract and print the error message
+    #     message = f"An error occurred: {str(ex)}"
+    #     print(message)
+    #     # abort(500, ex)
 
 def sign_up(user_role = UserRole.ADMIN.value):
     request_form = extract_request_body(request)

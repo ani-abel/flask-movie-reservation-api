@@ -13,15 +13,22 @@ class Payment(db.Model):
                         onupdate=datetime.now)  # The Date of the Instance Update => Changed with Every Update
     status = db.Column(db.Boolean, nullable=False, default=True)
 
+    # Relations
+    user_id = db.Column(db.String(100), db.ForeignKey("user.id"))
+    user = db.relationship("User", back_populates="payments")
 
+    amount = db.Column(db.Float, nullable=False, default=0)
     payment_ref = db.Column(db.String(255), nullable=False)
-    gateway = db.Column(db.Enum(PaymentGateway), nullable=False, default=PaymentGateway.PAYSTACK)
-    payment_status = db.Column(db.Enum(PaymentStatus), nullable=False, default=PaymentStatus.PENDING)
+    # gateway = db.Column(db.Enum(PaymentGateway), nullable=False, default=PaymentGateway.PAYSTACK.value)
+    # payment_status = db.Column(db.Enum(PaymentStatus), nullable=False, default=PaymentStatus.PENDING.value)
+    channel = db.Column(db.String(50), nullable=False)
+    gateway = db.Column(db.String(50), nullable=False, default=PaymentGateway.PAYSTACK.value)
+    payment_status = db.Column(db.String(50), nullable=False, default=PaymentStatus.PENDING.value)
     data_payload = db.Column(db.JSON, nullable=True)
 
     # Relations
-    ticket_id = db.Column(db.String(100), db.ForeignKey("ticket.id"))
-    ticket = db.relationship("Ticket", back_populates="payments")
+    # One-to-many
+    tickets = db.relationship("Ticket", back_populates="payment", cascade="all, delete-orphan")
 
     # How to serialize SqlAlchemy PostgreSQL Query to JSON => https://stackoverflow.com/a/46180522
     def toDict(self, include_nested_fields=None):

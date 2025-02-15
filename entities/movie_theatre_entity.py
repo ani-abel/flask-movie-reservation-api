@@ -1,4 +1,3 @@
-from time import timezone
 from uuid import uuid4
 from init_app import db
 from sqlalchemy import event
@@ -23,6 +22,7 @@ class MovieTheatre(db.Model):
     start_time = db.Column(db.String(20), nullable=False)
     end_time = db.Column(db.String(20), nullable=False)
     viewing_date = db.Column(db.DateTime(timezone=True), nullable=False)
+    current_number_of_tickets_bought = db.Column(db.Integer, nullable=False, default=0)
 
     movie_theatres = db.relationship("Ticket", back_populates="movie_theatre")
 

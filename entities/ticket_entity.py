@@ -23,8 +23,9 @@ class Ticket(db.Model):
     ticket_price_id = db.Column(db.String(100), db.ForeignKey("ticket_price.id"))
     ticket_price = db.relationship("TicketPrice", back_populates="tickets")
 
-    # One-to-many
-    payments = db.relationship("Payment", back_populates="ticket")
+    # Relations
+    payment_id = db.Column(db.String(100), db.ForeignKey("payment.id"))
+    payment = db.relationship("Payment", back_populates="tickets")
 
     # How to serialize SqlAlchemy PostgreSQL Query to JSON => https://stackoverflow.com/a/46180522
     def toDict(self, include_nested_fields=None):
